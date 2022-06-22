@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Posts on Shaobo&#39;s Blog</title>
-    <link>https://gszfwsb.github.io/wsb-blog/posts/</link>
-    <description>Recent content in Posts on Shaobo&#39;s Blog</description>
+    <title>Notice on Shaobo&#39;s Blog</title>
+    <link>https://gszfwsb.github.io/wsb-blog/categories/notice/</link>
+    <description>Recent content in Notice on Shaobo&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>2022 Shaobo Wang</copyright>
-    <lastBuildDate>Wed, 22 Jun 2022 02:01:58 +0530</lastBuildDate><atom:link href="https://gszfwsb.github.io/wsb-blog/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 22 Jun 2022 02:01:58 +0530</lastBuildDate><atom:link href="https://gszfwsb.github.io/wsb-blog/categories/notice/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>(No comment) 新博客！</title>
       <link>https://gszfwsb.github.io/wsb-blog/posts/new-born/</link>
