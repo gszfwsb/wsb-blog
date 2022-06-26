@@ -7,9 +7,104 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>2022 Shaobo Wang</copyright>
-    <lastBuildDate>Wed, 22 Jun 2022 02:01:58 +0530</lastBuildDate>
+    <lastBuildDate>Sat, 25 Jun 2022 02:01:58 +0530</lastBuildDate>
     
         <atom:link href="https://gszfwsb.github.io/wsb-blog/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    
+        <item>
+        <title>可解释性attribution方法简介（一）——SHAP和SAGE</title>
+        <link>https://gszfwsb.github.io/wsb-blog/posts/shap-sage/</link>
+        <pubDate>Sat, 25 Jun 2022 02:01:58 +0530</pubDate>
+        
+        <guid>https://gszfwsb.github.io/wsb-blog/posts/shap-sage/</guid>
+        <description>Shaobo&#39;s Blog https://gszfwsb.github.io/wsb-blog/posts/shap-sage/ -&lt;blockquote&gt;
+&lt;p&gt;参考自: &lt;a href=&#34;https://iancovert.com/blog/understanding-shap-sage/&#34;&gt;Explaining machine learning models with SHAP and SAGE&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;引入&#34;&gt;引入&lt;/h2&gt;
+&lt;p&gt;机器学习的模型很复杂，没有任何可解释性工具能提供对模型的完美理解或满足我们所有需求的解决方案，因此我们需要不同的工具来以不同的方式理解我们的模型。通过博弈交互角度解释是我们组近年来的一个核心工作,不过这篇文章中我们希望讲述我们体系之外的两个比较代表的工作.&lt;a href=&#34;https://arxiv.org/abs/1705.07874&#34;&gt;SHAP&lt;/a&gt;[1]和&lt;a href=&#34;https://arxiv.org/abs/2004.00668&#34;&gt;SAGE&lt;/a&gt;[2]，两个基于 Shapley 值的博弈论方法，算是其中比较代表性的工作。&lt;/p&gt;
+&lt;p&gt;这两个方法每一个方法都回答了一个具体的问题：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;SHAP 回答了：每个特征对于这个个体的预测贡献了多少？&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;SAGE 回答了：这个模型总体而言依赖于每个特征多少？&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;SHAP 是一个解释个体预测的方法（局部解释），但 SAGE 是一个解释模型在整个数据集上的行为（全局解释）。如图一所示，&lt;/p&gt;
+&lt;center&gt;
+  &lt;img style=&#34;border-radius: 0.3125em;
+box-shadow: 0 2px 4px 0 rgba(34,36,38,.12),0 2px 10px 0 rgba(34,36,38,.08);&#34;
+src=&#34;https://gszfwsb.github.io/wsb-blog/wsb-blog/images/shap_vs_sage.png&#34; width=&#34;80%&#34;&gt;
+&lt;br&gt;
+    &lt;div style=&#34;color:orange; border-bottom: 1px solid #d9d9d9;display: inline-block;color: #999;padding: 2px;&#34;&gt;
+SHAP和SAGE的对比&lt;/div&gt;
+&lt;/center&gt;
+&lt;h2 id=&#34;基础知识shapley-value&#34;&gt;基础知识：Shapley Value&lt;/h2&gt;
+&lt;p&gt;Shapley Value最早是在博弈论中提出的，最初和机器学习毫无关联。通过一个例子介绍Shapley Value
+想象一下，一个有$d$名员工的公司，他们由集合$D= \{1,2,\ldots,d \}$代表。当所有的员工都完成他们的工作时，公司每年可获得100万美元的利润，管理层希望通过奖金来分配利润。然而，管理层希望以一种公平的方式进行分配，根据人们对公司利润的贡献来奖励他们。&lt;/p&gt;
+&lt;p&gt;这家公司的管理层很有洞察力，所以他们有一个强大的工具来量化每个员工的贡献：他们清楚地知道，如果任何一个员工的子集$S\subseteq D$做他们的工作，公司会有多大的利润. 举几个例子。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;在所有员工都工作的情况下（$S=D$），他们赚了100万美元。&lt;/li&gt;
+&lt;li&gt;如果所有人都留下，但他们失去了首席执行官$S = \{ 2, 3, \ldots, d \}$，他们会赚到一半的钱，50万美元。&lt;/li&gt;
+&lt;li&gt;如果他们保留所有的人，除了几个新雇员$S=\{1, 2, \ldots, d - 2\}$，他们会赚到几乎同样多的利润，95万美元。&lt;/li&gt;
+&lt;li&gt;如果没有人在那里工作$S=\emptyset$，他们的利润正好是零。
+这些只是几个例子，但管理团队确切地知道公司在所有$2^d$个员工子集的情况下会有多少利润。然后，管理层用一个盈利能力函数来总结他们的知识：
+$$
+w: P(D) \to \mathbb{R}
+$$
+其中$P(D)$表示$D$的幂集.对于任一$D$的子集$S$，$w(S)$表示$S$的幂集的盈利能力。有了这些知识，管理团队召开会议，讨论给员工$1,2,\ldots,d$奖金 $\phi_1(w), \phi_2(w), \ldots, \phi_d(w)$.它们有如下的目标(也就是shapley value的基本性质):&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ol&gt;
+&lt;li&gt;(有效性) 奖金加起来应该是所有员工的盈利能力和没有员工的盈利能力之间的差额。即$\sum_{i \in D}\phi_i(w) = w(D) - w(\emptyset)$&lt;/li&gt;
+&lt;li&gt;(对称性) 如果两个员工$i,j$是可以互换的,那么把它们加到任何一个已有的员工集合中得到的奖励是不变的.即对所有$S$,$w(S\cup {i}) = w(S\cup {j})$.那么我们有$\phi_i(w) = \phi_j(w)$&lt;/li&gt;
+&lt;li&gt;(虚拟性) 如果员工$i$没有产生贡献,他的加入不会产生利润的变化.即对任一员工集合$S$,$w(S\cup {i})=w(S)$,那么$\phi_i(w)=0$&lt;/li&gt;
+&lt;li&gt;(线性性) 如果公司总体盈利函数$w$可以看作分开盈利的线性组合.比如对于$k$比交易$w_1,w_2,\ldots,w_k$,我们有$w=c_1w_1+c_2w_2+\ldots+c_kw_k$,那么每个员工的奖励金$\phi_i(w)$应该也是这$k$比生意中奖励金的线性组合,即$$ \phi_i(w)=c_1\phi_i(w_1)+c_2\phi_i(w_2)+\ldots+c_k\phi_i(w_k) $$&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;这些属性似乎是合理的，所以管理团队希望奖金$phi_i(w)$来满足性质1-4。挑战在于，如何做到这一点，或者是否有可能做到这一点，并不是很清楚。事实证明，有一个方法，每个员工$i\in D$的公平奖金由以下公式给出,可以证明Shapley Value是唯一满足这四个性质的方法:
+$$\phi_{i}(w)=\frac{1}{d} \sum_{S \subseteq D \backslash\{i\}}\left(\begin{array}{c}d-1 \\ |S|\end{array}\right)^{-1}[w(S \cup\{i\})-w(S)]$$
+这个公式看起来很复杂，但要计算员工$i$的奖金，我们基本上是考虑将$i$加入子集$S$的利润率增加，这表示为$w(S\cup \{i\}) - w(S)$,然后在所有不包括$i$的可能的子集$S$中取一个加权平均数，或者说$S\subseteq D \setminus \{i\}$。权重有点复杂，但这种精确的加权方案可以得到满足属性1-4的奖金性质。(如果你有兴趣了解这个加权方案，它来自于列举所有可能的$d$雇员的排序，然后在所有这些排序中平均增加雇员$i$所带来的利润）。&lt;/p&gt;
+&lt;h2 id=&#34;shap-shapley-additive-explanations&#34;&gt;SHAP (SHapley Additive exPlanations)&lt;/h2&gt;
+&lt;p&gt;现在我们将看到SAGE如何应用Shapley值来提供一种不同的模型理解：这次我们要解释$f$对每个特征$X^1,X^2,\ldots, X^d$的依赖程度,&lt;/p&gt;
+&lt;center&gt;
+  &lt;img style=&#34;border-radius: 0.3125em;
+box-shadow: 0 2px 4px 0 rgba(34,36,38,.12),0 2px 10px 0 rgba(34,36,38,.08);&#34;
+src=&#34;https://gszfwsb.github.io/wsb-blog/wsb-blog/images/sage_diagram.png&#34; width=&#34;80%&#34;&gt;
+&lt;br&gt;
+    &lt;div style=&#34;color:orange; border-bottom: 1px solid #d9d9d9;display: inline-block;color: #999;padding: 2px;&#34;&gt;
+SAGE给每个特征分配一个值，代表该特征对模型$f$的性能的贡献程度。最重要的特征有最高的值。&lt;/div&gt;
+&lt;/center&gt;
+&lt;p&gt;我们如何弄清楚哪些特征对一个模型来说是最重要的？为了得到一些关于SAGE的直觉，让我们回到人类专家，他做出了很好的预测，但无法解释其逻辑。&lt;/p&gt;
+&lt;p&gt;为了了解专家从哪些特征中获得了最多的信息，我们可以做一个实验，剥夺他们的信息，看看他们的预测准确性受到多大的影响。例如，我们可以抽取大量的客户样本，要求专家预测他们的还款概率，除了客户的年龄之外，其他的都可以。他们的准确性可能会下降一点。或者，我们可以要求专家预测除年龄、支票账户余额和工作以外的所有情况下的还款概率。现在他们的准确率应该下降很多，因为他们被剥夺了关键信息。&lt;/p&gt;
+&lt;p&gt;对于机器学习模型$f$,我们会遇到一个问题:$f$需要一组固定的特征.我们可以用体哦阿健概率的方式处理特征不在的情况,即:$X^{\hat{S}}|X^S = x^S$.我们可以定义一个合作游戏来表示给定子集的情况下模型的性能.给定一个损失函数$l$,游戏$v_f$定义如下:
+$$
+v_f(S) = -\mathbb{E}[l(\mathbb{E}[f(X)|X^S], Y)]
+$$
+对于任一子集$S\subseteq D$,我们可以计算$v_f(S)$的值来表示给定特征$X^S$的情况下$f$的性能.&lt;/p&gt;
+&lt;p&gt;现在,我们可以看到Shapley Value$\phi_i(v_f)$是用于量化对于模型性能而言,每一个特征的贡献.对于模型性能有很重要的贡献的特征会有比较大的值$\phi_i(v_f)&amp;gt;0$.而对于贡献很小的特征会有很小的值$\phi_i(v_f)\approx 0$.只有对模型性能有负贡献的特征才会有负值$\phi_i(v_f)&amp;lt;0$.这些是SAGE值.&lt;/p&gt;
+&lt;p&gt;该论文更详细地描述了SAGE及其属性，还提出了一种有效估计SAGE值的算法[2]。在理论方面，论文表明SAGE提供了关于数据分布的内在属性的洞察力（这可能被称为解释数据，而不是解释模型），并且SAGE统一了许多现有的特征重要性方法。我们在下面简要地谈一谈这两点。&lt;/p&gt;
+&lt;h3 id=&#34;解释数据&#34;&gt;解释数据&lt;/h3&gt;
+&lt;p&gt;SAGE主要是一个模型解释的工具，但它也可以用来深入了解数据的内在关系。例如，当SAGE与Bayes分类器$f(x)=p(y∣x)$和交叉熵损失一起应用时，SAGE值等于相互信息函数$v_f(S)=I(Y; X^S)$的Shapley值,对那些使用机器学习来了解世界（例如，哪些基因与乳腺癌有关）的用户来说是个好消息，他们对模型本身并不那么感兴趣。&lt;/p&gt;
+&lt;h3 id=&#34;统一的全局特征重要性方法&#34;&gt;统一的全局特征重要性方法&lt;/h3&gt;
+&lt;p&gt;本文提出了一类对特征子集所包含的预测能力提供加法近似的方法。加法重要性测量的框架将一些以前被视为不相关的方法联系起来。例如，我们可以看到SAGE与该框架中的方法之一&amp;ndash;排列测试有什么不同。&lt;/p&gt;
+&lt;p&gt;排列测试由Leo Breiman提出，用于评估随机森林模型中的特征重要性，计算当数据集的每一列被替换时，模型的性能下降多少[6]。SAGE可以被看作是排列测试的修改版。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;SAGE不是一次只保留一个特征，而是保留更大的特征子集。(通过只删除单个特征，互换测试可能会错误地将低重要性分配给具有良好代理关系的特征）。&lt;/li&gt;
+&lt;li&gt;SAGE从它们的条件分布中抽取被保留的特征$p(X^{\bar S}| X^S = x^S)$而不是它们的边际分布$p(X^{\bar S})$ (使用条件分布可以模拟一个特征的缺失，而使用边际分布则可以打破特征的依赖性，产生不可能的特征组合。)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;参考文献&#34;&gt;参考文献&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;Scott Lundberg, Su-In Lee. &amp;ldquo;A Unified Approach to Interpreting Model Predictions.&amp;rdquo; Neural Information Processing Systems, 2017.&lt;/li&gt;
+&lt;li&gt;Ian Covert, Scott Lundberg, Su-In Lee. &amp;ldquo;Understanding Global Feature Contributions With Additive Importance Measures.&amp;rdquo; Neural Information Processing Systems, 2020.&lt;/li&gt;
+&lt;li&gt;Lloyd Shapley. &amp;ldquo;A Value for n-Person Games.&amp;rdquo; Contributions to the Theory of Games, 1953.&lt;/li&gt;
+&lt;li&gt;Erik Strumbelj, Igor Kononenko. &amp;ldquo;An Efficient Explanation of Individual Classifications Using Game Theory.&amp;rdquo; Journal of Machine Learning Research, 2010.&lt;/li&gt;
+&lt;li&gt;Scott Lundberg et al. &amp;ldquo;From Local Explanations to Global Understanding with Explainable AI for Trees.&amp;rdquo; Nature Machine Intelligence, 2020.&lt;/li&gt;
+&lt;li&gt;Leo Breiman. &amp;ldquo;Random Forests.&amp;rdquo; Machine Learning, 2001.&lt;/li&gt;
+&lt;/ol&gt;
+- https://gszfwsb.github.io/wsb-blog/posts/shap-sage/ - 2022 Shaobo Wang</description>
+        </item>
     
     
     

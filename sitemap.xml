@@ -2,25 +2,37 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://gszfwsb.github.io/wsb-blog/posts/new-born/</loc>
-    <lastmod>2022-06-22T02:01:58+05:30</lastmod>
+    <loc>https://gszfwsb.github.io/wsb-blog/tags/attribution/</loc>
+    <lastmod>2022-06-25T02:01:58+05:30</lastmod>
   </url><url>
     <loc>https://gszfwsb.github.io/wsb-blog/categories/</loc>
+    <lastmod>2022-06-25T02:01:58+05:30</lastmod>
+  </url><url>
+    <loc>https://gszfwsb.github.io/wsb-blog/tags/interpretability/</loc>
+    <lastmod>2022-06-25T02:01:58+05:30</lastmod>
+  </url><url>
+    <loc>https://gszfwsb.github.io/wsb-blog/categories/machine-learning/</loc>
+    <lastmod>2022-06-25T02:01:58+05:30</lastmod>
+  </url><url>
+    <loc>https://gszfwsb.github.io/wsb-blog/posts/</loc>
+    <lastmod>2022-06-25T02:01:58+05:30</lastmod>
+  </url><url>
+    <loc>https://gszfwsb.github.io/wsb-blog/</loc>
+    <lastmod>2022-06-25T02:01:58+05:30</lastmod>
+  </url><url>
+    <loc>https://gszfwsb.github.io/wsb-blog/tags/</loc>
+    <lastmod>2022-06-25T02:01:58+05:30</lastmod>
+  </url><url>
+    <loc>https://gszfwsb.github.io/wsb-blog/posts/shap-sage/</loc>
+    <lastmod>2022-06-25T02:01:58+05:30</lastmod>
+  </url><url>
+    <loc>https://gszfwsb.github.io/wsb-blog/posts/new-born/</loc>
     <lastmod>2022-06-22T02:01:58+05:30</lastmod>
   </url><url>
     <loc>https://gszfwsb.github.io/wsb-blog/categories/miscellaneous/</loc>
     <lastmod>2022-06-22T02:01:58+05:30</lastmod>
   </url><url>
     <loc>https://gszfwsb.github.io/wsb-blog/tags/notice/</loc>
-    <lastmod>2022-06-22T02:01:58+05:30</lastmod>
-  </url><url>
-    <loc>https://gszfwsb.github.io/wsb-blog/posts/</loc>
-    <lastmod>2022-06-22T02:01:58+05:30</lastmod>
-  </url><url>
-    <loc>https://gszfwsb.github.io/wsb-blog/</loc>
-    <lastmod>2022-06-22T02:01:58+05:30</lastmod>
-  </url><url>
-    <loc>https://gszfwsb.github.io/wsb-blog/tags/</loc>
     <lastmod>2022-06-22T02:01:58+05:30</lastmod>
   </url>
 </urlset>

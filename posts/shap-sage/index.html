@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html><head>
+<title>可解释性attribution方法简介（一）——SHAP和SAGE</title>
+
+
+
+
+<meta charset="utf-8">
+<meta name="X-UA-Compatible" content="IE=edge">
+<meta name="google-site-verification" content="">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+<meta content="telephone=no" name="format-detection">
+<meta name="description" content="崭新的一页。">
+<meta name="renderer" content="webkit">
+<meta name="theme-color" content="#ffffff">
+
+
+
+<meta property="og:title" content="可解释性attribution方法简介（一）——SHAP和SAGE" />
+<meta property="og:description" content="崭新的一页。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://gszfwsb.github.io/wsb-blog/posts/shap-sage/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-06-25T02:01:58+05:30" />
+<meta property="article:modified_time" content="2022-06-25T02:01:58+05:30" /><meta property="og:site_name" content="My Blog" />
+
+
+
+
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="可解释性attribution方法简介（一）——SHAP和SAGE"/>
+<meta name="twitter:description" content="崭新的一页。"/>
+
+
+
+
+
+
+
+<link type="text/css" rel="stylesheet" href="/wsb-blog/vendor/css/bootstrap.min.css">
+
+
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="https://gszfwsb.github.io/wsb-blog/scss/journal.min.0f46f98b723f2aad4b02d9370bb6aa7848b5c2b2a5579642014082283683d2d8.css" integrity="sha256-D0b5i3I/Kq1LAtk3C7aqeEi1wrKlV5ZCAUCCKDaD0tg=" media="screen">
+
+
+
+<script src="/wsb-blog/vendor/js/loadCSS.js"></script>
+<script>
+  loadCSS("https://fonts.googleapis.com/css?family=Fira+Mono|Material+Icons");
+</script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.css" integrity="sha384-RZU/ijkSsFbcmivfdRBQDtwuwVqK7GMOw6IMvKyeWL2K5UAlyp6WonmB8m7Jd0Hn" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.js" integrity="sha384-pK1WpvzWVBQiP0/GjnvRxV4mOb0oxFuyRxJlk6vVw146n3egcN5C925NCP7a7BY8" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/contrib/auto-render.min.js" integrity="sha384-vZTG03m+2yp6N6BNi5iM4rW4oIwk5DfcNdFfxkk9ZWpDriOkXX8voJBFrAO7MpVl" crossorigin="anonymous"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+          
+          
+          delimiters: [
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false},
+              {left: '\\(', right: '\\)', display: false},
+              {left: '\\[', right: '\\]', display: true}
+          ],
+          
+          throwOnError : false
+        });
+    });
+</script>
+
+
+
+  <script src="/wsb-blog/js/toc.js"></script>
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="/wsb-blog/vendor/js/md5.min.js"></script>
+<script>
+  var gitalk = new Gitalk({
+  clientID: 'your client id',
+  clientSecret: 'your client secret',
+  repo: 'repo name',
+  owner: 'user',
+  admin: ['user'],
+  id: md5(location.pathname),
+  distractionFreeMode: 'false'
+  });
+  window.onload = function () {
+        gitalk.render('gitalk-container')
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body>
+    	<div id="app"><div id="sideContainer" class="side-container">
+    
+    <a class="a-block nav-head false" href="https://gszfwsb.github.io/wsb-blog/">
+    
+        <div class="nav-title">
+            Shaobo&#39;s Blog
+        </div>
+        
+        <div class="nav-subtitle">
+            wsb的生活记录.
+        </div>
+        
+    </a>
+
+    <div class="nav-link-list">
+        
+        
+            
+            
+            
+                
+            
+            
+            
+            <a class="a-block nav-link-item active" href="/wsb-blog/posts">
+                归档
+            </a>
+            
+        
+            
+            
+            
+            
+            
+            <a class="a-block nav-link-item false" href="/wsb-blog/categories">
+                类别
+            </a>
+            
+        
+            
+            
+            
+            
+            
+            <a class="a-block nav-link-item false" href="/wsb-blog/tags">
+                标签
+            </a>
+            
+        
+    </div>
+
+    
+
+    <div class="nav-footer">
+        
+Hugo Theme <a href="https://github.com/amazingrise/hugo-theme-diary">Diary</a> by <a href="https://risehere.net/">Rise</a>
+<br>
+移植自 <a href="https://mak1t0.cc/" target="_blank" rel="noreferrer noopener">Makito</a>'s <a href="https://github.com/SumiMakito/hexo-theme-journal/" target="_blank" rel="noreferrer noopener">Journal.</a> <br>
+<br>
+
+&copy;
+	
+	2022 Shaobo Wang
+	
+
+    </div>
+    
+</div><div id="extraContainer" class="extra-container">
+    
+    
+    <div class="toc animated-visibility" :class="{ invisible: scrollY <= 140 }">
+
+
+	<div class="toc-content">
+	
+		
+		
+		
+		<center>- 目录 -</center>
+		
+		
+		<ul>
+			
+				
+				
+					
+						
+						
+						
+						
+							
+								
+									<ul>
+								
+							
+						
+						
+							<li>
+								<a href="#%e5%bc%95%e5%85%a5" onclick="onNavClick(`#引入-nav`)" id="引入-nav">
+									引入
+								</a>
+							</li>
+						
+						
+					
+				
+			
+				
+				
+					
+						
+						
+						
+						
+						
+							<li>
+								<a href="#%e5%9f%ba%e7%a1%80%e7%9f%a5%e8%af%86shapley-value" onclick="onNavClick(`#基础知识shapley-value-nav`)" id="基础知识shapley-value-nav">
+									基础知识：Shapley Value
+								</a>
+							</li>
+						
+						
+					
+				
+			
+				
+				
+					
+						
+						
+						
+						
+						
+							<li>
+								<a href="#shap-shapley-additive-explanations" onclick="onNavClick(`#shap-shapley-additive-explanations-nav`)" id="shap-shapley-additive-explanations-nav">
+									SHAP (SHapley Additive exPlanations)
+								</a>
+							</li>
+						
+						
+					
+				
+			
+				
+				
+					
+						
+						
+						
+						
+							
+								
+									<ul>
+								
+							
+						
+						
+							<li>
+								<a href="#%e8%a7%a3%e9%87%8a%e6%95%b0%e6%8d%ae" onclick="onNavClick(`#解释数据-nav`)" id="解释数据-nav">
+									解释数据
+								</a>
+							</li>
+						
+						
+					
+				
+			
+				
+				
+					
+						
+						
+						
+						
+						
+							<li>
+								<a href="#%e7%bb%9f%e4%b8%80%e7%9a%84%e5%85%a8%e5%b1%80%e7%89%b9%e5%be%81%e9%87%8d%e8%a6%81%e6%80%a7%e6%96%b9%e6%b3%95" onclick="onNavClick(`#统一的全局特征重要性方法-nav`)" id="统一的全局特征重要性方法-nav">
+									统一的全局特征重要性方法
+								</a>
+							</li>
+						
+						
+					
+				
+			
+				
+				
+					
+						
+						
+						
+						
+						
+							<li>
+								<a href="#%e5%8f%82%e8%80%83%e6%96%87%e7%8c%ae" onclick="onNavClick(`#参考文献-nav`)" id="参考文献-nav">
+									参考文献
+								</a>
+							</li>
+						
+						
+					
+				
+			
+		</ul>
+	</div>
+
+</div>
+    
+    <div class="pagination">
+        <a id="globalBackToTop" class="pagination-action animated-visibility" href="#top" :class="{ invisible: scrollY == 0 }">
+            <i class="material-icons pagination-action-icon">
+                keyboard_arrow_up
+            </i>
+        </a>
+        
+        
+    </div>
+</div>
+<div class="single-column-drawer-container" id="drawer"
+     v-bind:class="{ 'single-column-drawer-container-active': isDrawerOpen }">
+    <div class="drawer-content">
+        <div class="drawer-menu">
+            
+            
+            
+                
+                
+                
+                    
+                
+                
+                
+                <a class="a-block drawer-menu-item active" href="/wsb-blog/posts">
+                    归档
+                </a>
+                
+            
+                
+                
+                
+                
+                
+                <a class="a-block drawer-menu-item false" href="/wsb-blog/categories">
+                    类别
+                </a>
+                
+            
+                
+                
+                
+                
+                
+                <a class="a-block drawer-menu-item false" href="/wsb-blog/tags">
+                    标签
+                </a>
+                
+            
+            
+            <div class="toc">
+
+
+	<div class="toc-content">
+	
+		
+		
+		
+		<center>- 目录 -</center>
+		
+		
+		<ul>
+			
+				
+				
+					
+						
+						
+						
+						
+							
+								
+									<ul>
+								
+							
+						
+						
+							<li>
+								<a href="#%e5%bc%95%e5%85%a5" onclick="onNavClick(`#引入-nav`)" id="引入-nav">
+									引入
+								</a>
+							</li>
+						
+						
+					
+				
+			
+				
+				
+					
+						
+						
+						
+						
+						
+							<li>
+								<a href="#%e5%9f%ba%e7%a1%80%e7%9f%a5%e8%af%86shapley-value" onclick="onNavClick(`#基础知识shapley-value-nav`)" id="基础知识shapley-value-nav">
+									基础知识：Shapley Value
+								</a>
+							</li>
+						
+						
+					
+				
+			
+				
+				
+					
+						
+						
+						
+						
+						
+							<li>
+								<a href="#shap-shapley-additive-explanations" onclick="onNavClick(`#shap-shapley-additive-explanations-nav`)" id="shap-shapley-additive-explanations-nav">
+									SHAP (SHapley Additive exPlanations)
+								</a>
+							</li>
+						
+						
+					
+				
+			
+				
+				
+					
+						
+						
+						
+						
+							
+								
+									<ul>
+								
+							
+						
+						
+							<li>
+								<a href="#%e8%a7%a3%e9%87%8a%e6%95%b0%e6%8d%ae" onclick="onNavClick(`#解释数据-nav`)" id="解释数据-nav">
+									解释数据
+								</a>
+							</li>
+						
+						
+					
+				
+			
+				
+				
+					
+						
+						
+						
+						
+						
+							<li>
+								<a href="#%e7%bb%9f%e4%b8%80%e7%9a%84%e5%85%a8%e5%b1%80%e7%89%b9%e5%be%81%e9%87%8d%e8%a6%81%e6%80%a7%e6%96%b9%e6%b3%95" onclick="onNavClick(`#统一的全局特征重要性方法-nav`)" id="统一的全局特征重要性方法-nav">
+									统一的全局特征重要性方法
+								</a>
+							</li>
+						
+						
+					
+				
+			
+				
+				
+					
+						
+						
+						
+						
+						
+							<li>
+								<a href="#%e5%8f%82%e8%80%83%e6%96%87%e7%8c%ae" onclick="onNavClick(`#参考文献-nav`)" id="参考文献-nav">
+									参考文献
+								</a>
+							</li>
+						
+						
+					
+				
+			
+		</ul>
+	</div>
+
+</div>
+            
+        </div>
+    </div>
+</div>
+<transition name="fade">
+    <div id="drawer-mask" v-bind:class="{ 'single-column-drawer-mask': mounted }" v-if="isDrawerOpen" v-on:click="toggleDrawer"></div>
+</transition>
+<nav id="navBar" class="navbar sticky-top navbar-light single-column-nav-container">
+    <div id="navBackground" class="nav-background"></div>
+    <div class="container container-narrow nav-content">
+        <button id="nav_dropdown_btn" class="nav-dropdown-toggle" type="button" v-on:click="toggleDrawer">
+            <i class="material-icons">
+                menu
+            </i>
+        </button>
+        <a id="navTitle" class="navbar-brand" href="https://gszfwsb.github.io/wsb-blog/">
+            Shaobo&#39;s Blog
+        </a>
+        
+    </div>
+</nav>
+<div class="single-column-header-container" id="pageHead"
+     v-bind:style="{ transform: 'translateZ(0px) translateY('+.3*scrollY+'px)', opacity: 1-navOpacity }">
+    <a href="https://gszfwsb.github.io/wsb-blog/">
+        <div class="single-column-header-title">Shaobo&#39;s Blog</div>
+        
+        <div class="single-column-header-subtitle">wsb的生活记录.</div>
+        
+
+    </a>
+</div>
+
+            <div id="content">
+                <div id="streamContainer" class="stream-container">
+
+    <div class="post-list-container post-list-container-shadow">
+        <div class="post">
+            
+            
+            
+                
+            
+
+            <div class="post-head-wrapper"
+                
+                    
+                    
+                    style="background-image: url('https://gszfwsb.github.io/wsb-blog/images/shap_vs_sage.png')"
+                    
+                
+            >
+                <div class="post-title">
+                    可解释性attribution方法简介（一）——SHAP和SAGE
+                    
+                    <div class="post-subtitle">
+                        崭新的一页。
+                    </div>
+                    
+                    <div class="post-meta">
+                        
+                        <time itemprop="datePublished">
+                            2022-06-25 02:01
+                        </time>
+                        
+
+                        
+                            <i class="material-icons" style="">folder</i>
+                                <a href="/wsb-blog/categories/machine-learning">Machine Learning</a>
+                                &nbsp;
+                        
+
+                        
+                            <i class="material-icons" style="">label</i>
+                            
+                                <a href="/wsb-blog/tags/interpretability">interpretability</a>
+                                &nbsp;
+                            
+                                <a href="/wsb-blog/tags/attribution">attribution</a>
+                                &nbsp;
+                            
+                        
+                        
+                    </div>
+                </div>
+            </div>
+            
+            <div class="post-body-wrapper">
+                
+                <div class="post-body" v-pre>
+                
+                    <blockquote>
+<p>参考自: <a href="https://iancovert.com/blog/understanding-shap-sage/">Explaining machine learning models with SHAP and SAGE</a></p>
+</blockquote>
+<h2 id="引入">引入</h2>
+<p>机器学习的模型很复杂，没有任何可解释性工具能提供对模型的完美理解或满足我们所有需求的解决方案，因此我们需要不同的工具来以不同的方式理解我们的模型。通过博弈交互角度解释是我们组近年来的一个核心工作,不过这篇文章中我们希望讲述我们体系之外的两个比较代表的工作.<a href="https://arxiv.org/abs/1705.07874">SHAP</a>[1]和<a href="https://arxiv.org/abs/2004.00668">SAGE</a>[2]，两个基于 Shapley 值的博弈论方法，算是其中比较代表性的工作。</p>
+<p>这两个方法每一个方法都回答了一个具体的问题：</p>
+<ul>
+<li>
+<p>SHAP 回答了：每个特征对于这个个体的预测贡献了多少？</p>
+</li>
+<li>
+<p>SAGE 回答了：这个模型总体而言依赖于每个特征多少？</p>
+</li>
+</ul>
+<p>SHAP 是一个解释个体预测的方法（局部解释），但 SAGE 是一个解释模型在整个数据集上的行为（全局解释）。如图一所示，</p>
+<center>
+  <img style="border-radius: 0.3125em;
+box-shadow: 0 2px 4px 0 rgba(34,36,38,.12),0 2px 10px 0 rgba(34,36,38,.08);"
+src="/wsb-blog/images/shap_vs_sage.png" width="80%">
+<br>
+    <div style="color:orange; border-bottom: 1px solid #d9d9d9;display: inline-block;color: #999;padding: 2px;">
+SHAP和SAGE的对比</div>
+</center>
+<h2 id="基础知识shapley-value">基础知识：Shapley Value</h2>
+<p>Shapley Value最早是在博弈论中提出的，最初和机器学习毫无关联。通过一个例子介绍Shapley Value
+想象一下，一个有$d$名员工的公司，他们由集合$D= \{1,2,\ldots,d \}$代表。当所有的员工都完成他们的工作时，公司每年可获得100万美元的利润，管理层希望通过奖金来分配利润。然而，管理层希望以一种公平的方式进行分配，根据人们对公司利润的贡献来奖励他们。</p>
+<p>这家公司的管理层很有洞察力，所以他们有一个强大的工具来量化每个员工的贡献：他们清楚地知道，如果任何一个员工的子集$S\subseteq D$做他们的工作，公司会有多大的利润. 举几个例子。</p>
+<ul>
+<li>在所有员工都工作的情况下（$S=D$），他们赚了100万美元。</li>
+<li>如果所有人都留下，但他们失去了首席执行官$S = \{ 2, 3, \ldots, d \}$，他们会赚到一半的钱，50万美元。</li>
+<li>如果他们保留所有的人，除了几个新雇员$S=\{1, 2, \ldots, d - 2\}$，他们会赚到几乎同样多的利润，95万美元。</li>
+<li>如果没有人在那里工作$S=\emptyset$，他们的利润正好是零。
+这些只是几个例子，但管理团队确切地知道公司在所有$2^d$个员工子集的情况下会有多少利润。然后，管理层用一个盈利能力函数来总结他们的知识：
+$$
+w: P(D) \to \mathbb{R}
+$$
+其中$P(D)$表示$D$的幂集.对于任一$D$的子集$S$，$w(S)$表示$S$的幂集的盈利能力。有了这些知识，管理团队召开会议，讨论给员工$1,2,\ldots,d$奖金 $\phi_1(w), \phi_2(w), \ldots, \phi_d(w)$.它们有如下的目标(也就是shapley value的基本性质):</li>
+</ul>
+<ol>
+<li>(有效性) 奖金加起来应该是所有员工的盈利能力和没有员工的盈利能力之间的差额。即$\sum_{i \in D}\phi_i(w) = w(D) - w(\emptyset)$</li>
+<li>(对称性) 如果两个员工$i,j$是可以互换的,那么把它们加到任何一个已有的员工集合中得到的奖励是不变的.即对所有$S$,$w(S\cup {i}) = w(S\cup {j})$.那么我们有$\phi_i(w) = \phi_j(w)$</li>
+<li>(虚拟性) 如果员工$i$没有产生贡献,他的加入不会产生利润的变化.即对任一员工集合$S$,$w(S\cup {i})=w(S)$,那么$\phi_i(w)=0$</li>
+<li>(线性性) 如果公司总体盈利函数$w$可以看作分开盈利的线性组合.比如对于$k$比交易$w_1,w_2,\ldots,w_k$,我们有$w=c_1w_1+c_2w_2+\ldots+c_kw_k$,那么每个员工的奖励金$\phi_i(w)$应该也是这$k$比生意中奖励金的线性组合,即$$ \phi_i(w)=c_1\phi_i(w_1)+c_2\phi_i(w_2)+\ldots+c_k\phi_i(w_k) $$</li>
+</ol>
+<p>这些属性似乎是合理的，所以管理团队希望奖金$phi_i(w)$来满足性质1-4。挑战在于，如何做到这一点，或者是否有可能做到这一点，并不是很清楚。事实证明，有一个方法，每个员工$i\in D$的公平奖金由以下公式给出,可以证明Shapley Value是唯一满足这四个性质的方法:
+$$\phi_{i}(w)=\frac{1}{d} \sum_{S \subseteq D \backslash\{i\}}\left(\begin{array}{c}d-1 \\ |S|\end{array}\right)^{-1}[w(S \cup\{i\})-w(S)]$$
+这个公式看起来很复杂，但要计算员工$i$的奖金，我们基本上是考虑将$i$加入子集$S$的利润率增加，这表示为$w(S\cup \{i\}) - w(S)$,然后在所有不包括$i$的可能的子集$S$中取一个加权平均数，或者说$S\subseteq D \setminus \{i\}$。权重有点复杂，但这种精确的加权方案可以得到满足属性1-4的奖金性质。(如果你有兴趣了解这个加权方案，它来自于列举所有可能的$d$雇员的排序，然后在所有这些排序中平均增加雇员$i$所带来的利润）。</p>
+<h2 id="shap-shapley-additive-explanations">SHAP (SHapley Additive exPlanations)</h2>
+<p>现在我们将看到SAGE如何应用Shapley值来提供一种不同的模型理解：这次我们要解释$f$对每个特征$X^1,X^2,\ldots, X^d$的依赖程度,</p>
+<center>
+  <img style="border-radius: 0.3125em;
+box-shadow: 0 2px 4px 0 rgba(34,36,38,.12),0 2px 10px 0 rgba(34,36,38,.08);"
+src="/wsb-blog/images/sage_diagram.png" width="80%">
+<br>
+    <div style="color:orange; border-bottom: 1px solid #d9d9d9;display: inline-block;color: #999;padding: 2px;">
+SAGE给每个特征分配一个值，代表该特征对模型$f$的性能的贡献程度。最重要的特征有最高的值。</div>
+</center>
+<p>我们如何弄清楚哪些特征对一个模型来说是最重要的？为了得到一些关于SAGE的直觉，让我们回到人类专家，他做出了很好的预测，但无法解释其逻辑。</p>
+<p>为了了解专家从哪些特征中获得了最多的信息，我们可以做一个实验，剥夺他们的信息，看看他们的预测准确性受到多大的影响。例如，我们可以抽取大量的客户样本，要求专家预测他们的还款概率，除了客户的年龄之外，其他的都可以。他们的准确性可能会下降一点。或者，我们可以要求专家预测除年龄、支票账户余额和工作以外的所有情况下的还款概率。现在他们的准确率应该下降很多，因为他们被剥夺了关键信息。</p>
+<p>对于机器学习模型$f$,我们会遇到一个问题:$f$需要一组固定的特征.我们可以用体哦阿健概率的方式处理特征不在的情况,即:$X^{\hat{S}}|X^S = x^S$.我们可以定义一个合作游戏来表示给定子集的情况下模型的性能.给定一个损失函数$l$,游戏$v_f$定义如下:
+$$
+v_f(S) = -\mathbb{E}[l(\mathbb{E}[f(X)|X^S], Y)]
+$$
+对于任一子集$S\subseteq D$,我们可以计算$v_f(S)$的值来表示给定特征$X^S$的情况下$f$的性能.</p>
+<p>现在,我们可以看到Shapley Value$\phi_i(v_f)$是用于量化对于模型性能而言,每一个特征的贡献.对于模型性能有很重要的贡献的特征会有比较大的值$\phi_i(v_f)&gt;0$.而对于贡献很小的特征会有很小的值$\phi_i(v_f)\approx 0$.只有对模型性能有负贡献的特征才会有负值$\phi_i(v_f)&lt;0$.这些是SAGE值.</p>
+<p>该论文更详细地描述了SAGE及其属性，还提出了一种有效估计SAGE值的算法[2]。在理论方面，论文表明SAGE提供了关于数据分布的内在属性的洞察力（这可能被称为解释数据，而不是解释模型），并且SAGE统一了许多现有的特征重要性方法。我们在下面简要地谈一谈这两点。</p>
+<h3 id="解释数据">解释数据</h3>
+<p>SAGE主要是一个模型解释的工具，但它也可以用来深入了解数据的内在关系。例如，当SAGE与Bayes分类器$f(x)=p(y∣x)$和交叉熵损失一起应用时，SAGE值等于相互信息函数$v_f(S)=I(Y; X^S)$的Shapley值,对那些使用机器学习来了解世界（例如，哪些基因与乳腺癌有关）的用户来说是个好消息，他们对模型本身并不那么感兴趣。</p>
+<h3 id="统一的全局特征重要性方法">统一的全局特征重要性方法</h3>
+<p>本文提出了一类对特征子集所包含的预测能力提供加法近似的方法。加法重要性测量的框架将一些以前被视为不相关的方法联系起来。例如，我们可以看到SAGE与该框架中的方法之一&ndash;排列测试有什么不同。</p>
+<p>排列测试由Leo Breiman提出，用于评估随机森林模型中的特征重要性，计算当数据集的每一列被替换时，模型的性能下降多少[6]。SAGE可以被看作是排列测试的修改版。</p>
+<ul>
+<li>SAGE不是一次只保留一个特征，而是保留更大的特征子集。(通过只删除单个特征，互换测试可能会错误地将低重要性分配给具有良好代理关系的特征）。</li>
+<li>SAGE从它们的条件分布中抽取被保留的特征$p(X^{\bar S}| X^S = x^S)$而不是它们的边际分布$p(X^{\bar S})$ (使用条件分布可以模拟一个特征的缺失，而使用边际分布则可以打破特征的依赖性，产生不可能的特征组合。)</li>
+</ul>
+<h3 id="参考文献">参考文献</h3>
+<ol>
+<li>Scott Lundberg, Su-In Lee. &ldquo;A Unified Approach to Interpreting Model Predictions.&rdquo; Neural Information Processing Systems, 2017.</li>
+<li>Ian Covert, Scott Lundberg, Su-In Lee. &ldquo;Understanding Global Feature Contributions With Additive Importance Measures.&rdquo; Neural Information Processing Systems, 2020.</li>
+<li>Lloyd Shapley. &ldquo;A Value for n-Person Games.&rdquo; Contributions to the Theory of Games, 1953.</li>
+<li>Erik Strumbelj, Igor Kononenko. &ldquo;An Efficient Explanation of Individual Classifications Using Game Theory.&rdquo; Journal of Machine Learning Research, 2010.</li>
+<li>Scott Lundberg et al. &ldquo;From Local Explanations to Global Understanding with Explainable AI for Trees.&rdquo; Nature Machine Intelligence, 2020.</li>
+<li>Leo Breiman. &ldquo;Random Forests.&rdquo; Machine Learning, 2001.</li>
+</ol>
+
+                    
+                    <HR width="100%" id="EOF">
+		    <p style="color:#777;">最后修改于 2022-06-25</p>
+                    
+                </div>
+            </div>
+            
+            
+            <nav class="post-pagination">
+
+                
+                <a class="newer-posts">
+			下回<br>已经到头啦。
+                </a>
+                
+                
+                
+                <a class="older-posts" href="https://gszfwsb.github.io/wsb-blog/posts/new-born/">
+			上回<br>(No comment) 新博客！
+                </a>
+                
+            </nav>
+            <div class="post-comment-wrapper">
+                
+
+
+<div id="gitalk-container"></div>
+
+
+
+
+
+
+
+
+
+            </div>
+        </div>
+    </div>
+
+
+                    </div>
+            </div><div id="single-column-footer">
+Hugo Theme <a href="https://github.com/amazingrise/hugo-theme-diary">Diary</a> by <a href="https://risehere.net/">Rise</a>
+<br>
+移植自 <a href="https://mak1t0.cc/" target="_blank" rel="noreferrer noopener">Makito</a>'s <a href="https://github.com/SumiMakito/hexo-theme-journal/" target="_blank" rel="noreferrer noopener">Journal.</a> <br>
+<br>
+
+&copy;
+	
+	2022 Shaobo Wang
+	
+</div>
+            </div>
+    
+    <script src="/wsb-blog/js/journal.js"></script>
+    </body>
+</html>

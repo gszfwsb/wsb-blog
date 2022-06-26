@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Posts on Shaobo&#39;s Blog</title>
-    <link>https://gszfwsb.github.io/wsb-blog/posts/</link>
-    <description>Recent content in Posts on Shaobo&#39;s Blog</description>
+    <title>attribution on Shaobo&#39;s Blog</title>
+    <link>https://gszfwsb.github.io/wsb-blog/tags/attribution/</link>
+    <description>Recent content in attribution on Shaobo&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>2022 Shaobo Wang</copyright>
-    <lastBuildDate>Sat, 25 Jun 2022 02:01:58 +0530</lastBuildDate><atom:link href="https://gszfwsb.github.io/wsb-blog/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 25 Jun 2022 02:01:58 +0530</lastBuildDate><atom:link href="https://gszfwsb.github.io/wsb-blog/tags/attribution/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>可解释性attribution方法简介（一）——SHAP和SAGE</title>
       <link>https://gszfwsb.github.io/wsb-blog/posts/shap-sage/</link>
@@ -23,16 +23,6 @@
 SHAP和SAGE的对比基础知识：Shapley Value Shapley Value最早是在博弈论中提出的，最初和机器学习毫无关联。通过一个例子介绍Shapley Value 想象一下，一个有$d$名员工的公司，他们由集合$D= \{1,2,\ldots,d \}$代表。当所有的员工都完成他们的工作时，公司每年可获得100万美元的利润，管理层希望通过奖金来分配利润。然而，管理层希望以一种公平的方式进行分配，根据人们对公司利润的贡献来奖励他们。
 这家公司的管理层很有洞察力，所以他们有一个强大的工具来量化每个员工的贡献：他们清楚地知道，如果任何一个员工的子集$S\subseteq D$做他们的工作，公司会有多大的利润. 举几个例子。
  在所有员工都工作的情况下（$S=D$），他们赚了100万美元。 如果所有人都留下，但他们失去了首席执行官$S = \{ 2, 3, \ldots, d \}$，他们会赚到一半的钱，50万美元。 如果他们保留所有的人，除了几个新雇员$S=\{1, 2, \ldots, d - 2\}$，他们会赚到几乎同样多的利润，95万美元。 如果没有人在那里工作$S=\emptyset$，他们的利润正好是零。 这些只是几个例子，但管理团队确切地知道公司在所有$2^d$个员工子集的情况下会有多少利润。然后，管理层用一个盈利能力函数来总结他们的知识： $$ w: P(D) \to \mathbb{R} $$ 其中$P(D)$表示$D$的幂集.对于任一$D$的子集$S$，$w(S)$表示$S$的幂集的盈利能力。有了这些知识，管理团队召开会议，讨论给员工$1,2,\ldots,d$奖金 $\phi_1(w), \phi_2(w), \ldots, \phi_d(w)$.</description>
-    </item>
-    
-    <item>
-      <title>(No comment) 新博客！</title>
-      <link>https://gszfwsb.github.io/wsb-blog/posts/new-born/</link>
-      <pubDate>Wed, 22 Jun 2022 02:01:58 +0530</pubDate>
-      
-      <guid>https://gszfwsb.github.io/wsb-blog/posts/new-born/</guid>
-      <description>写于此，一个新的开端 告别本科时光，再见HIT！
-方大同《BB88》这是一个关于wsb崭新的博客。我会记录人生的重要片段于此。2022年6月于山东威海，国际海水浴场</description>
     </item>
     
   </channel>
