@@ -267,6 +267,24 @@ Hugo Theme <a href="https://github.com/amazingrise/hugo-theme-diary">Diary</a> b
 						
 						
 						
+						
+							<li>
+								<a href="#sage-sage-shapley-additive-global-importance" onclick="onNavClick(`#sage-sage-shapley-additive-global-importance-nav`)" id="sage-sage-shapley-additive-global-importance-nav">
+									SAGE (SAGE (Shapley Additive Global importancE)
+								</a>
+							</li>
+						
+						
+					
+				
+			
+				
+				
+					
+						
+						
+						
+						
 							
 								
 									<ul>
@@ -441,6 +459,24 @@ Hugo Theme <a href="https://github.com/amazingrise/hugo-theme-diary">Diary</a> b
 							<li>
 								<a href="#shap-shapley-additive-explanations" onclick="onNavClick(`#shap-shapley-additive-explanations-nav`)" id="shap-shapley-additive-explanations-nav">
 									SHAP (SHapley Additive exPlanations)
+								</a>
+							</li>
+						
+						
+					
+				
+			
+				
+				
+					
+						
+						
+						
+						
+						
+							<li>
+								<a href="#sage-sage-shapley-additive-global-importance" onclick="onNavClick(`#sage-sage-shapley-additive-global-importance-nav`)" id="sage-sage-shapley-additive-global-importance-nav">
+									SAGE (SAGE (Shapley Additive Global importancE)
 								</a>
 							</li>
 						
@@ -650,7 +686,9 @@ $$
 $$\phi_{i}(w)=\frac{1}{d} \sum_{S \subseteq D \backslash\{i\}}\left(\begin{array}{c}d-1 \\ |S|\end{array}\right)^{-1}[w(S \cup\{i\})-w(S)]$$
 这个公式看起来很复杂，但要计算员工$i$的奖金，我们基本上是考虑将$i$加入子集$S$的利润率增加，这表示为$w(S\cup \{i\}) - w(S)$,然后在所有不包括$i$的可能的子集$S$中取一个加权平均数，或者说$S\subseteq D \setminus \{i\}$。权重有点复杂，但这种精确的加权方案可以得到满足属性1-4的奖金性质。(如果你有兴趣了解这个加权方案，它来自于列举所有可能的$d$雇员的排序，然后在所有这些排序中平均增加雇员$i$所带来的利润）。</p>
 <h2 id="shap-shapley-additive-explanations">SHAP (SHapley Additive exPlanations)</h2>
-<p>现在我们将看到SAGE如何应用Shapley值来提供一种不同的模型理解：这次我们要解释$f$对每个特征$X^1,X^2,\ldots, X^d$的依赖程度,</p>
+<h2 id="sage-sage-shapley-additive-global-importance">SAGE (SAGE (Shapley Additive Global importancE)</h2>
+<p>)
+现在我们将看到SAGE如何应用Shapley值来提供一种不同的模型理解：这次我们要解释$f$对每个特征$X^1,X^2,\ldots, X^d$的依赖程度,</p>
 <center>
   <img style="border-radius: 0.3125em;
 box-shadow: 0 2px 4px 0 rgba(34,36,38,.12),0 2px 10px 0 rgba(34,36,38,.08);"
